@@ -1,0 +1,12 @@
+---
+- name: Play to build OOT drivers using SRO
+  hosts: provisioner
+  roles:
+    - role: get_managed_clusters
+      tags: get_managed_clusters
+    - role: build_driver
+      tags: build_driver
+  collections:
+    - kubernetes.core.k8s_info
+    - kubernetes.core.k8s
+    - containers.podman.podman_container

@@ -1,0 +1,41 @@
+---
+apiVersion: sro.openshift.io/v1beta1
+kind: SpecialResource
+metadata:
+  name: "{{ item.name }}"
+spec:
+  namespace: "{{ item.namespace }}"
+  chart:
+    name: ice-driver
+    version: 0.0.1
+    repository:
+      name: chart
+      url: cm://oot-driver/charts
+  set:
+    kind: Values
+    apiVersion: sro.openshift.io/v1beta1
+    kmodNames: ["ice"]
+    containerName: "{{ item.drivercontainer }}"
+    externalRegistry: "{{ registry }}"
+    signDriver: false
+    downloadDriver: yes
+    kernelVersion: "{{ item.kernelversion }}"
+    buildArgs:
+    - Name: "KMODVER"
+      Value: "SRO"
+    - Name: "IMAGE"
+      Value: "{{ item.dtki }}"
+    - Name: "KERNEL_SOURCE"
+      Value: "yum"
+    - Name: "ICE_DRIVER_VERSION"
+      Value: "1.6.4"
+  driverContainer:
+    artifacts:
+      images:
+        - name: "{{ registry }}/{{ item.sourcecontainer }}"
+          kind: DockerImage
+          namespace: "{{ item.namespace }}"
+          path:
+            - sourcePath: "/usr/src/oot-driver/."
+              destinationDir: "./"
+          pullsecret: external-registry

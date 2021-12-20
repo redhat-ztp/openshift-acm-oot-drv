@@ -1,0 +1,30 @@
+all:
+  vars:
+
+    # Path to kubeconfig for the ACM hub cluster
+    pull_secret: /tmp/pull-secret.txt
+    kubeconfig: /tmp/kubeconfig
+    sro_namespace: openshift-special-resource-operator
+
+    # User suplied global parameters
+    registry: "cnfde2.ptp.lab.eng.bos.redhat.com:5000"
+    ootnamespace: "oot-driver"
+
+    # User suplied list of ManagedResources to build drivers for
+    managedresources:
+        - name: "ice-driver"
+          drivercontainer: "ice-driver-container"
+          sourcecontainer: "oot-driver/oot-source-driver"
+          srtemplate: "sr-ice.yml.j2" # SpecialResource template
+          mctemplate: "mc-ice.yml.j2" # MachineConfig template
+          acmpolicy:
+            name: "ice-driver-policy"
+            namespace: "ice-driver-policies"
+            selctorkey: "specialresource.openshift.io/resource-ice"
+            selctorval: "true"
+
+  # Ansible hosts.
+  children:
+    provisioner:
+      hosts:
+        localhost:
