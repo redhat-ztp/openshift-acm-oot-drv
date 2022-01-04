@@ -1,5 +1,4 @@
 ---
 collections:
   - containers.podman
-  - kubernetes.core.k8s_info
-  - kubernetes.core.k8s
+  - kubernetes.core

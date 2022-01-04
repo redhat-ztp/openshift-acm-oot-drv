@@ -13,7 +13,7 @@
     special_resources : "{{ special_resources | default([]) +
                     [{  'name': item.1.name+'-'+item.0.kernelversion|replace('_', '.')|replace('-', '.'),
                         'drivercontainer': item.1.drivercontainer,
-                        'sourcecontainer': item.1.sourcecontainer,
+                        'sourcecontainer': sourcecontainer,
                         'srtemplate': item.1.srtemplate,
                         'namespace': ootnamespace,
                         'kernelversion': item.0.kernelversion,
@@ -27,7 +27,7 @@
     special_resources : "{{ special_resources +
                     [{  'name': item.1.name+'-'+item.0.rtkernelversion|replace('_', '.')|replace('-', '.'),
                         'drivercontainer': item.1.drivercontainer,
-                        'sourcecontainer': item.1.sourcecontainer,
+                        'sourcecontainer': sourcecontainer,
                         'srtemplate': item.1.srtemplate,
                         'namespace': ootnamespace,
                         'kernelversion': item.0.rtkernelversion,

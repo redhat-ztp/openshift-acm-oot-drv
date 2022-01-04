@@ -1,0 +1,6 @@
+---
+- name: Play to deploy the necessary pre-requisites
+  hosts: provisioner
+  roles:
+    - role: deploy_pre_requisites
+      tags: deploy_pre_requisites

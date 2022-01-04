@@ -1,20 +1,32 @@
 all:
   vars:
 
-    # Path to kubeconfig for the ACM hub cluster
-    pull_secret: /tmp/pull-secret.txt
-    kubeconfig: /tmp/kubeconfig
+    # SRO namespace. Do not change
     sro_namespace: openshift-special-resource-operator
 
-    # User suplied global parameters
-    registry: "cnfde2.ptp.lab.eng.bos.redhat.com:5000"
-    ootnamespace: "oot-driver"
+    # Path to pull secret for local registry and standard registries
+    pull_secret: /tmp/pull-secret.txt
+    
+    # Path to kubeconfig for the ACM hub cluster
+    kubeconfig: /tmp/kubeconfig
+    
+    # Path to repo git pull directory
+    repopath: /tmp/openshift-acm-oot-drv
 
-    # User suplied list of ManagedResources to build drivers for
+    # Local registry domain name and port.
+    registry: "cnfde2.ptp.lab.eng.bos.redhat.com:5000"
+    
+    # Namespace used for builds
+    ootnamespace: "oot-driver"
+    
+    # The source container
+    sourcecontainer: "oot-source-driver"
+
+    # User suplied list of ManagedResources to build drivers.
+    # Add your driver to the list
     managedresources:
         - name: "ice-driver"
           drivercontainer: "ice-driver-container"
-          sourcecontainer: "oot-driver/oot-source-driver"
           srtemplate: "sr-ice.yml.j2" # SpecialResource template
           mctemplate: "mc-ice.yml.j2" # MachineConfig template
           acmpolicy:
