@@ -22,8 +22,8 @@ all:
     # The source container
     sourcecontainer: "oot-source-driver"
 
-    # User suplied list of ManagedResources to build drivers.
-    # Add your driver to the list
+    # User suplied list of ManagedResources to build drivers for.
+    # Add your driver to this list
     managedresources:
         - name: "ice-driver"
           drivercontainer: "ice-driver-container"
@@ -32,7 +32,7 @@ all:
           acmpolicy:
             name: "ice-driver-policy"
             namespace: "ice-driver-policies"
-            selctorkey: "specialresource.openshift.io/resource-ice"
+            selctorkey: "specialresource.openshift.io/intel-eth-800"
             selctorval: "true"
 
   # Ansible hosts.

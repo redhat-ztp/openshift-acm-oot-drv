@@ -61,6 +61,11 @@ ansible-galaxy collection install -r requirements.yml
 There are few setup steps required prior to running the playbook with the sample driver.
 
 - Make sure you can run the OpenShift CLI as a user with cluster-admin privileges
+- Setup the necessary prerequisites by running the `deploy_prerequisites.yml` playbook
+
+```bash
+ansible-playbook -i inventory deploy_prerequisites.yml
+```
 - Add your pull secret as a Secret named `external-registry` in the `oot-driver` namespace so that SRO can pull/push the images it needs from/to your local registry.
 
 ```bash
@@ -80,12 +85,12 @@ oc create configmap registry-cas -n openshift-config --from-file=${REGISTRY_FQDN
 oc patch image.config.openshift.io/cluster --patch '{"spec":{"additionalTrustedCA":{"name":"registry-cas"}}}' --type=merge
 ```
 
+- Add the `specialresource.openshift.io/intel-eth-800` label that the sample driver is expecting onto the nodes that have the Intel(R) Ethernet 800 Series NIC
 
 ## Running The Playbooks
 
 The playbooks provided in this repository will build and deploy a sample driver which is for the Intel(R) Ethernet 800 Series NICs.
 
-- `deploy_prerequisites.yml`: setup the necessary prerequisites
 - `deploy_sro.yml`: installs SRO on the ACM HUB cluster using the provided kubeconfig
 - `build_drivers.yml`: creates and applies the SpecialResource CRs to kick start the driver builds
 - `deploy_drivers.yml`: deploys the driver containers onto the manged SNOs through ACM policy
@@ -93,7 +98,6 @@ The playbooks provided in this repository will build and deploy a sample driver 
 To run the playbooks with the provided sample driver, use these commands.
 
 ```bash
-ansible-playbook -i inventory deploy_prerequisites.yml
 ansible-playbook -i inventory deploy_sro.yml
 ansible-playbook -i inventory build_drivers.yml
 ansible-playbook -i inventory deploy_drivers.yml
@@ -103,7 +107,9 @@ ansible-playbook -i inventory deploy_drivers.yml
 
 To add you own drivers, you can follow the sample driver provided.
 
-Create a Helm chart and the corresponding SpecialResource CR template file.  The playbooks will drive your SpecialResource CR with the following variables:
+1. Label the SNO nodes you want to deploy drivers onto.  The sample driver, for example uses the `specialresource.openshift.io/intel-eth-800` label to select nodes to deploy onto.
+
+2. Create a Helm chart and the corresponding SpecialResource CR template file.  The playbooks will drive your SpecialResource CR with the following variables:
 - `item.name`: The name of the driver
 - `item.namespace`: The namespace where to apply your SpeialResource CR
 - `item.drivercontainer`: The driver container that will be pushed to the local registry
@@ -111,4 +117,6 @@ Create a Helm chart and the corresponding SpecialResource CR template file.  The
 - `item.dtki`: The Driver Toolkit Image to use
 - `item.sourcecontainer`: The source container from the local registry
 
+3. Create an ACM Policy wrapped MachineConfig following the sample provided in `templates/mc-ice.yml.j2`
 
+4. Add your driver to the list of managed resources in the `inventory.yml` file.
