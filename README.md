@@ -45,9 +45,11 @@ Requires the following to be installed on the provisioner host:
 
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-on-specific-operating-systems)
 - [podman](https://github.com/containers/podman/)
+- [oc client](https://docs.openshift.com/container-platform/4.9/cli_reference/openshift_cli/getting-started-cli.html)
 
 ```bash
-dnf install ansible podman openshift-clients
+dnf install ansible podman pip
+pip install kubernetes
 ```
 
 There's also some required Ansible modules that can be installed with the following command:
