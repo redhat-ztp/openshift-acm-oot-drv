@@ -1,14 +1,18 @@
 - name: "Get DTK image and kernel for OCP version {{ item.key }}"
   shell: "oc adm -a {{ pull_secret }} release info --image-for=driver-toolkit quay.io/openshift-release-dev/ocp-release:{{ item.key }}-x86_64  || /bin/true"
   register: dtki_info
+  args:
+    executable: /usr/bin/bash
+  changed_when: false
 
 - name: Capture the DTK image
   set_fact:
     dtki: "{{ dtki_info.stdout }}"
 
 - name: Pull the DTK image
-  shell:
+  command:
     "podman pull --authfile={{ pull_secret }} {{ dtki }}"
+  changed_when: false
 
 - name: Run DTK container
   containers.podman.podman_container:
@@ -27,16 +31,22 @@
 
 - name: Get the STD kernel verion
   shell:
-    "podman exec {{ dtkc }} rpm -qa | grep 'kernel-core-' | sed 's#kernel-core-##'"
+    "set -o pipefail && podman exec {{ dtkc }} rpm -qa | grep 'kernel-core-' | sed 's#kernel-core-##'"
   register: kernelver
+  args:
+    executable: /usr/bin/bash
   when: dtkc_info.container.State.Running
+  changed_when: false
 
 
 - name: Get the RT kernel verion
   shell:
-    "podman exec {{ dtkc }} rpm -qa | grep 'kernel-rt-core-' | sed 's#kernel-rt-core-##'"
+    "set -o pipefail && podman exec {{ dtkc }} rpm -qa | grep 'kernel-rt-core-' | sed 's#kernel-rt-core-##'"
   register: rtkernelver
+  args:
+    executable: /usr/bin/bash
   when: dtkc_info.container.State.Running
+  changed_when: false
 
 - name: "Set ManagedClusterVersion for OCP-{{ item.key }}"
   set_fact:
