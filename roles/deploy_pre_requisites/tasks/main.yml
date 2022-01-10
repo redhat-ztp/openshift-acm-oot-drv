@@ -13,10 +13,3 @@
 - name: Push the source container image
   shell:
     "podman push --authfile={{ pull_secret }} --tls-verify=false {{ registry }}/{{ sourcecontainer }}:latest"
-
-- name: Add the Helm chart as a ConfigMap
-  environment:
-    KUBECONFIG: "{{ kubeconfig }}"
-  shell:
-    "oc -n {{ ootnamespace }} create cm charts --from-file={{ repopath }}/charts/index.yaml --from-file={{ repopath }}/charts/ice-driver-0.0.1.tgz"
-
