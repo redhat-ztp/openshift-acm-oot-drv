@@ -1,0 +1,17 @@
+- name: Create the namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ ootnamespace }}"
+    kubeconfig: "{{ kubeconfig }}"
+    state: present
+
+- name: Build the source container image
+  command:
+    "podman build -t {{ registry }}/{{ sourcecontainer }}:latest -f Dockerfile.source {{ repopath }}/src-container"
+  changed_when: false
+
+- name: Push the source container image
+  command:
+    "podman push --authfile={{ pull_secret }} --tls-verify=false {{ registry }}/{{ sourcecontainer }}:latest"
+  changed_when: false
