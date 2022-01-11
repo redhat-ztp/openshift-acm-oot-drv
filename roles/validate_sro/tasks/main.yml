@@ -1,0 +1,33 @@
+- name: Get the SRO nd NFD Pods
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: "{{ sro_namespace }}"
+    kubeconfig: "{{ kubeconfig }}"
+  register: pod_list
+
+- name: Check that the SRO and NFD Pods are present
+  assert:
+    that:
+      - "{{ pod_list.api_found }}"
+      - "not {{ pod_list.failed }}"
+      - "{{ pod_list.resources }} | length > 0"
+    fail_msg: "No pods found in {{ sro_namespace }} namespace.  Is SRO deployed ?"
+
+- name: Set container statuses
+  vars:
+    query: "resources[].status.containerStatuses"
+  set_fact:
+    cont_statuses: "{{ pod_list  | json_query(query) | flatten }}"
+
+- name: Check that the SRO and NFD Pods are healthy
+  assert:
+    that:
+      - "{{ item.ready }}"
+      - "{{ item.started }}"
+    quiet: true
+    fail_msg: "Container {{ item.name }} not started or not ready"
+  loop: "{{ cont_statuses }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+
