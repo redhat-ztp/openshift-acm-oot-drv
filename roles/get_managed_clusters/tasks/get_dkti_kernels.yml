@@ -1,0 +1,74 @@
+- name: "Get DTK image and kernel for OCP version {{ item.key }}"
+  shell: "oc adm -a {{ pull_secret }} release info --image-for=driver-toolkit quay.io/openshift-release-dev/ocp-release:{{ item.key }}-x86_64  || /bin/true"
+  register: dtki_info
+  args:
+    executable: /usr/bin/bash
+  changed_when: false
+
+- name: Capture the DTK image
+  set_fact:
+    dtki: "{{ dtki_info.stdout }}"
+
+- name: Pull the DTK image
+  command:
+    "podman pull --authfile={{ pull_secret }} {{ dtki }}"
+  changed_when: false
+
+- name: Run DTK container
+  containers.podman.podman_container:
+    name: dtkc
+    image: "{{ dtki }}"
+    authfile: "{{ pull_secret }}"
+    command: "sleep 1d"
+    force_restart: yes
+    state: started
+  register: dtkc_info
+
+- name: Capture the DTK container name
+  set_fact:
+    dtkc: "{{ dtkc_info.container.Name }}"
+  when: dtkc_info.container.State.Running
+
+- name: Get the STD kernel verion
+  shell:
+    "set -o pipefail && podman exec {{ dtkc }} rpm -qa | grep 'kernel-core-' | sed 's#kernel-core-##'"
+  register: kernelver
+  args:
+    executable: /usr/bin/bash
+  when: dtkc_info.container.State.Running
+  changed_when: false
+
+
+- name: Get the RT kernel verion
+  shell:
+    "set -o pipefail && podman exec {{ dtkc }} rpm -qa | grep 'kernel-rt-core-' | sed 's#kernel-rt-core-##'"
+  register: rtkernelver
+  args:
+    executable: /usr/bin/bash
+  when: dtkc_info.container.State.Running
+  changed_when: false
+
+- name: "Set ManagedClusterVersion for OCP-{{ item.key }}"
+  set_fact:
+    managedclustersversions : "{{ managedclustersversions | default([]) +
+                                  [{'ocpversion': item.key,
+                                     'dtki': dtki,
+                                     'hash': (kernelver.stdout ~ rtkernelver.stdout)|hash,
+                                     'kernelversion': kernelver.stdout,
+                                     'rtkernelversion': rtkernelver.stdout,
+                                     'sites': item.value}] }}"
+  when:
+    - dtkc_info.container.State.Running
+    - kernelver.rc == 0
+    - rtkernelver.rc == 0
+
+- name: Stop the DTK container
+  containers.podman.podman_container:
+    name: "{{ dtkc }}"
+    state: absent
+  when: dtkc_info.container.State.Running
+
+- name: Remove DTK image
+  containers.podman.podman_image:
+    name: "{{ dtki }}"
+    state: absent

@@ -1,0 +1,41 @@
+- name: Get a list of managed clusters
+  kubernetes.core.k8s_info:
+    api_version: cluster.open-cluster-management.io/v1
+    kind: ManagedCluster
+    kubeconfig: "{{ kubeconfig }}"
+  register: mc_response
+
+- name: Check that the ManagedCluster CR is found
+  assert:
+    that:
+      - "{{ mc_response.api_found }}"
+      - "{{ mc_response.failed }} == False"
+    quiet: true
+    fail_msg: "The required ManagedCluster CR is not found"
+
+- name: Build OCP versions list
+  vars:
+    ocp_versions: {}
+    version: "{{ item.metadata.labels.openshiftVersion }}"
+    site: "{{ item.metadata.name }}"
+  set_fact:
+    ocp_versions: "{{ ocp_versions |
+                  combine({version: ocp_versions[version]|default([]) + [site]}) }}"
+  loop: "{{ mc_response.resources }}"
+  when: "item.metadata.labels.openshiftVersion is defined"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: Get DTK images and kernel versions
+  include_tasks:
+    file: get_dkti_kernels.yml
+  loop: "{{ ocp_versions | dict2items }}"
+  when: "item.key | regex_search('[0-9]\\.[0-9]+\\.[0-9]+$')"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Display Managed clusters
+  debug:
+    msg: "{{ item }}"
+  loop: "{{ managedclustersversions }}"
+
