@@ -11,7 +11,7 @@ The driver containers are built and pushed to the external registry.
 ## Role variables
 
 A state variable is passed to either add or remove all the objects that this
-role uses. A 'absent' state will remove all the objects while a 'present'
+role uses. An 'absent' state will remove all the objects while a 'present'
 state will add all the objects.
 
 ## Example Playbook
