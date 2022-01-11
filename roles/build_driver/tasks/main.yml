@@ -1,0 +1,46 @@
+- name: Filter out duplicate kernel versions
+  set_fact:
+    kernel_versions: "{{ kernel_versions|default([]) +
+                [{'dtki': item.1.0.dtki,
+                  'kernelversion': item.1.0.kernelversion,
+                  'rtkernelversion': item.1.0.rtkernelversion }] }}"
+  loop: "{{ managedclustersversions | groupby('hash') }}"
+  loop_control:
+    label: "{{ item.1.0.kernelversion }}"
+
+- name: Build list for the standard kernel builds
+  set_fact:
+    special_resources : "{{ special_resources | default([]) +
+                    [{  'name': item.1.name+'-'+item.0.kernelversion|replace('_', '.')|replace('-', '.'),
+                        'drivercontainer': item.1.drivercontainer,
+                        'sourcecontainer': sourcecontainer,
+                        'srtemplate': item.1.srtemplate,
+                        'namespace': ootnamespace,
+                        'kernelversion': item.0.kernelversion,
+                        'dtki': item.0.dtki }] }}"
+  loop: "{{ kernel_versions | product(managedresources) | list }}"
+  loop_control:
+    label: "{{ 'kernel:'+ item.0.kernelversion +' driver:'+  item.1.name }}"
+
+- name: Build list for the RT kernel builds
+  set_fact:
+    special_resources : "{{ special_resources +
+                    [{  'name': item.1.name+'-'+item.0.rtkernelversion|replace('_', '.')|replace('-', '.'),
+                        'drivercontainer': item.1.drivercontainer,
+                        'sourcecontainer': sourcecontainer,
+                        'srtemplate': item.1.srtemplate,
+                        'namespace': ootnamespace,
+                        'kernelversion': item.0.rtkernelversion,
+                        'dtki': item.0.dtki }] }}"
+  loop: "{{ kernel_versions | product(managedresources) | list }}"
+  loop_control:
+    label: "{{ 'rtkernel:'+ item.0.rtkernelversion +' driver:'+  item.1.name }}"
+
+- name: Build The driver
+  kubernetes.core.k8s:
+    template: "{{ item.srtemplate }}"
+    kubeconfig: "{{ kubeconfig }}"
+    state: present
+  loop: "{{ special_resources }}"
+  loop_control:
+    label: "{{ item.name }}"
