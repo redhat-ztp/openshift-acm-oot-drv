@@ -1,0 +1,9 @@
+---
+- name: Play to deploy OOT drivers using SRO
+  hosts: provisioner
+  roles:
+    - role: deploy_drivers
+      tags: deploy_drivers
+  collections:
+    - kubernetes.core.k8s_info
+    - kubernetes.core.k8s

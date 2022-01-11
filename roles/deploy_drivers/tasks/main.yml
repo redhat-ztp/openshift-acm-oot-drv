@@ -1,0 +1,62 @@
+- name: Create the managed special resource namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ item.acmpolicy.namespace }}"
+    kubeconfig: "{{ kubeconfig }}"
+    state: "{{ state }}"
+  loop: "{{ managedresources }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create the ACM policy placment rules
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps.open-cluster-management.io/v1
+      kind: PlacementRule
+      metadata:
+        name: "{{ item.name }}-placementrule"
+        namespace: "{{ item.acmpolicy.namespace }}"
+      spec:
+        clusterConditions:
+        - status: "True"
+          type: ManagedClusterConditionAvailable
+        clusterSelector:
+          matchExpressions:
+            - {key: "{{ item.acmpolicy.selctorkey }}" , operator: In, values: ["{{ item.acmpolicy.selctorval }}"]}
+    kubeconfig: "{{ kubeconfig }}"
+    state: "{{ state }}"
+  loop: "{{ managedresources }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create the ACM policy bindings
+  kubernetes.core.k8s:
+    definition:
+      kind: PlacementBinding
+      metadata:
+        name: "{{ item.name }}-placementbinding"
+        namespace: "{{ item.acmpolicy.namespace }}"
+      placementRef:
+        apiGroup: apps.open-cluster-management.io
+        kind: PlacementRule
+        name: "{{ item.name }}-placementrule"
+      subjects:
+      - apiGroup: policy.open-cluster-management.io
+        kind: Policy
+        name: "{{ item.acmpolicy.name }}"
+    kubeconfig: "{{ kubeconfig }}"
+    state: "{{ state }}"
+  loop: "{{ managedresources }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+
+- name: Apply Machineconfig through ACM Policy
+  kubernetes.core.k8s:
+    template: "{{ item.mctemplate }}"
+    kubeconfig: "{{ kubeconfig }}"
+    state: "{{ state }}"
+  loop: "{{ managedresources }}"
+  loop_control:
+    label: "{{ item.name }}"
