@@ -1,8 +1,8 @@
 # openshift-acm-oot-drv
 
-This repository contains playbooks to manage out of tree drivers using the Special Resource Operator on Redhat ACM managed clusters.
+This repository contains playbooks to manage out-of-tree drivers using the Special Resource Operator on Red Hat ACM (RHACM) managed clusters.
 
-The target deployment model is a RHACM hub cluster managing many spoke SNO clusters as illustrated below.
+The target deployment model is a RHACM hub cluster managing multi-spoke Single Node Openshift (SNO) clusters as illustrated below.
 
 ```
 
@@ -35,9 +35,9 @@ The target deployment model is a RHACM hub cluster managing many spoke SNO clust
 
 ```
 
-The playbooks deploy SRO on the ACM Hub cluster and builds the drivers there.  Then uses a MachineConfig wrapped in an ACM policy to deploy the driver.
+The Ansible playbooks deploy SpecialResourceOperator (SRO) on the ACM Hub cluster and builds the drivers there, then uses a MachineConfig wrapped in an ACM policy to deploy the driver
 
-It currently only supports Single Node Openshift (SNO) nodes as managed clusters.
+The playbooks only support SNO nodes as managed clusters.
 
 ### Dependencies
 
@@ -58,9 +58,9 @@ There's also some required Ansible modules that can be installed with the follow
 ansible-galaxy collection install -r requirements.yml
 ```
 
-## Before Running The Playbook
+## Prerequisites
 
-There are few setup steps required prior to running the playbook with the sample driver.
+The following steps are required prior to running the playbook with the sample driver.
 
 - Make sure you can run the OpenShift CLI as a user with cluster-admin privileges
 - Setup the necessary prerequisites by running the `deploy_prerequisites.yml` playbook

@@ -1,14 +1,14 @@
 ## build_driver
 
-This role will generate a SpecialResouce CR from the template given by the
-user.  It then applies the CR onto the cluster to kick start the driver builds
+This role will generate a SpecialResource CR from the template given by the
+user.  It then applies the CR onto the cluster to kick start the driver builds.
 Once the get_managed_clusters builds a list of OCP version from the
 ManagedClusters CR, it builds a unique list of kernel version as some different
 OCP version might have the same underlying kernel version.
 
 ## Requirements
 
-SRO and NFD have to be installed and properly functioning.
+SRO and Node Feature Discovery (NFD) have to be installed and properly functioning.
 
 ## Dependencies
 
