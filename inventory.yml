@@ -14,7 +14,8 @@ all:
     repopath: /tmp/openshift-acm-oot-drv
 
     # Local registry domain name and port.
-    registry: "cnfde2.ptp.lab.eng.bos.redhat.com:5000"
+    # Update it to reflect your own registry's FQDN and port.
+    registry: "registry.example.lab:5000"
     
     # Namespace used for builds
     ootnamespace: "oot-driver"
