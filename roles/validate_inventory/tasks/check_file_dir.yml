@@ -1,0 +1,12 @@
+- name: "Check that {{ item }} exists"
+  stat:
+    path: "{{ item }}"
+  register: file_dir
+
+- name: "Assert that {{ item }} exists"
+  assert:
+    that:
+      "{{ file_dir.stat.exists }}"
+    quiet: true
+    fail_msg: "{{ item }}: No such file or directory"
+

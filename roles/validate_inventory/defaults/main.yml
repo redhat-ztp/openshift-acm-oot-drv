@@ -1,0 +1,5 @@
+inventory_files:
+  - "{{ pull_secret }}"
+  - "{{ kubeconfig }}"
+  - "{{ repopath }}"
+

@@ -1,3 +1,4 @@
 dependencies:
+  - role: validate_inventory
   - role: validate_sro
 

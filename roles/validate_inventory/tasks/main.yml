@@ -1,0 +1,5 @@
+- name: Validate inventory files and directories
+  include_tasks:
+    file: check_file_dir.yml
+  loop: "{{ inventory_files }}"
+
